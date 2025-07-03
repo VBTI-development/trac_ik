@@ -54,7 +54,7 @@ namespace TRAC_IK
     xml_string = nh_->declare_parameter(URDF_param, std::string(""));
   else
     nh_->get_parameter(URDF_param, xml_string);
-  
+
   if(xml_string.empty())
   {
     RCLCPP_FATAL(nh_->get_logger(), "Could not load the xml from parameter: %s", URDF_param.c_str());
