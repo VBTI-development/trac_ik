@@ -219,7 +219,8 @@ bool TRAC_IKKinematicsPlugin::getPositionIK(const geometry_msgs::msg::Pose &ik_p
                           solution_callback,
                           error_code,
                           consistency_limits,
-                          options);
+                          options,
+                          std::make_unique<std::string>("Distance"));
 }
 
 bool TRAC_IKKinematicsPlugin::searchPositionIK(const geometry_msgs::msg::Pose &ik_pose,
@@ -300,13 +301,14 @@ bool TRAC_IKKinematicsPlugin::searchPositionIK(const geometry_msgs::msg::Pose &i
 }
 
 bool TRAC_IKKinematicsPlugin::searchPositionIK(const geometry_msgs::msg::Pose &ik_pose,
-    const std::vector<double> &ik_seed_state,
-    double timeout,
-    std::vector<double> &solution,
-    const IKCallbackFn &solution_callback,
-    moveit_msgs::msg::MoveItErrorCodes &error_code,
-    const std::vector<double> &consistency_limits,
-    const kinematics::KinematicsQueryOptions &options) const
+                                               const std::vector<double> &ik_seed_state,
+                                               double timeout,
+                                               std::vector<double> &solution,
+                                               const IKCallbackFn &solution_callback,
+                                               moveit_msgs::msg::MoveItErrorCodes &error_code,
+                                               const std::vector<double> &consistency_limits,
+                                               const kinematics::KinematicsQueryOptions &options,
+                                               const std::unique_ptr<std::string>& solvetype_override) const
 {
   RCLCPP_DEBUG_STREAM(LOGGER, "getPositionIK");
 
@@ -343,19 +345,25 @@ bool TRAC_IKKinematicsPlugin::searchPositionIK(const geometry_msgs::msg::Pose &i
 
   TRAC_IK::SolveType solvetype;
 
-  if (solve_type == "Manipulation1")
+  std::string temp = solve_type;
+  if (solvetype_override)
+  {
+    temp = *solvetype_override;
+  }
+
+  if (temp == "Manipulation1")
     solvetype = TRAC_IK::Manip1;
-  else if (solve_type == "Manipulation2")
+  else if (temp == "Manipulation2")
     solvetype = TRAC_IK::Manip2;
-  else if (solve_type == "Manipulation3")
+  else if (temp == "Manipulation3")
       solvetype = TRAC_IK::Manip3;
-  else if (solve_type == "Distance")
+  else if (temp == "Distance")
     solvetype = TRAC_IK::Distance;
   else
   {
-    if (solve_type != "Speed")
+    if (temp != "Speed")
     {
-      RCLCPP_WARN_STREAM(LOGGER, solve_type << " is not a valid solve_type; setting to default: Speed");
+      RCLCPP_WARN_STREAM(LOGGER, temp << " is not a valid solve_type; setting to default: Speed");
     }
     solvetype = TRAC_IK::Speed;
   }
