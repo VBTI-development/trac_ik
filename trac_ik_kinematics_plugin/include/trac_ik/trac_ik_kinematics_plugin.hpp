@@ -69,13 +69,16 @@ public:
 
   /**
    * @brief Given a desired pose of the end-effector, compute the joint angles to reach it
+   *
+   * In contrast to the searchPositionIK methods, this one is expected to return the solution
+   * closest to the seed state. Randomly re-seeding is explicitly not allowed.
    * @param ik_pose the desired pose of the link
    * @param ik_seed_state an initial guess solution for the inverse kinematics
    * @param solution the solution vector
    * @param error_code an error code that encodes the reason for failure or success
+   * @param options container for other IK options. See definition of KinematicsQueryOptions for details.
    * @return True if a valid solution was found, false otherwise
    */
-
   // Returns the first IK solution that is within joint limits, this is called by get_ik() service
   bool getPositionIK(const geometry_msgs::msg::Pose &ik_pose,
                      const std::vector<double> &ik_seed_state,
@@ -157,7 +160,8 @@ public:
                         const IKCallbackFn &solution_callback,
                         moveit_msgs::msg::MoveItErrorCodes &error_code,
                         const std::vector<double> &consistency_limits,
-                        const kinematics::KinematicsQueryOptions &options) const;
+                        const kinematics::KinematicsQueryOptions &options,
+                        const std::unique_ptr<std::string>& solver_override = nullptr) const;
 
 
   /**
