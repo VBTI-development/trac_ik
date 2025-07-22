@@ -370,7 +370,7 @@ bool TRAC_IKKinematicsPlugin::searchPositionIK(const geometry_msgs::msg::Pose& i
     solve_type = TRAC_IK::Speed;
   }
 
-  int rc = ik_solver_->CartToJnt(in, frame, out, bounds, solve_type);
+  int rc = ik_solver_->CartToJnt(in, frame, out, timeout, bounds, solve_type);
 
   // If you want to retrieve all the returned solutions, the (commented) code below does it
   // Note that you have to call getSolutions() AFTER a successful code to CartToJnt to get all the solutions generated

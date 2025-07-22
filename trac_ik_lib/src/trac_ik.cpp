@@ -39,11 +39,10 @@ OF THE POSSIBILITY OF SUCH DAMAGE.
 namespace TRAC_IK
 {
 
-  TRAC_IK::TRAC_IK(rclcpp::Node::SharedPtr nh, const std::string& base_link, const std::string& tip_link, const std::string& URDF_param, double max_time, double eps) :
+  TRAC_IK::TRAC_IK(rclcpp::Node::SharedPtr nh, const std::string& base_link, const std::string& tip_link, const std::string& URDF_param, double eps) :
   nh_(nh),
   initialized_(false),
-  eps_(eps),
-  max_time_(max_time)
+  eps_(eps)
 {
   urdf::Model robot_model;
   std::string xml_string;
@@ -125,14 +124,13 @@ namespace TRAC_IK
 }
 
 
-  TRAC_IK::TRAC_IK(rclcpp::Node::SharedPtr nh, const KDL::Chain& chain, const KDL::JntArray& q_min, const KDL::JntArray& q_max, double max_time, double eps):
+  TRAC_IK::TRAC_IK(rclcpp::Node::SharedPtr nh, const KDL::Chain& chain, const KDL::JntArray& q_min, const KDL::JntArray& q_max, double eps):
   nh_(nh),
   initialized_(false),
   chain_(chain),
   lb_(q_min),
   ub_(q_max),
-  eps_(eps),
-  max_time_(max_time)
+  eps_(eps)
 {
   initialize();
 }
@@ -205,24 +203,21 @@ template<typename T1, typename T2>
 bool TRAC_IK::runSolver(T1& solver, T2& other_solver,
                         const KDL::JntArray &q_init,
                         const KDL::Frame &p_in,
-                        const SolveType &solve_type)
+                        const SolveType &solve_type,
+                        const double max_time)
 {
   KDL::JntArray q_out;
-
-  double fulltime = max_time_;
   KDL::JntArray seed = q_init;
 
   while (true)
   {
     auto timediff = system_clock_.now() - start_time_;
-    auto time_left = fulltime - timediff.seconds();
+    auto time_left = max_time - timediff.seconds();
 
     if (time_left <= 0)
       break;
 
-    solver.setMaxtime(time_left);
-
-    int RC = solver.CartToJnt(seed, p_in, q_out, bounds_);
+    int RC = solver.CartToJnt(seed, p_in, q_out, time_left, bounds_);
     if (RC >= 0)
     {
       switch (solve_type)
@@ -278,9 +273,8 @@ bool TRAC_IK::runSolver(T1& solver, T2& other_solver,
       else
         seed(j) = fRand(lb_(j), ub_(j));
   }
-  other_solver.abort();
 
-  solver.setMaxtime(fulltime);
+  other_solver.abort();
 
   return true;
 }
@@ -397,7 +391,7 @@ Eigen::MatrixXd TRAC_IK::computeSingularValues(const KDL::JntArray& arr)
 }
 
 
-int TRAC_IK::CartToJnt(const KDL::JntArray &q_init, const KDL::Frame &p_in, KDL::JntArray &q_out, const KDL::Twist& bounds, SolveType solve_type)
+int TRAC_IK::CartToJnt(const KDL::JntArray &q_init, const KDL::Frame &p_in, KDL::JntArray &q_out, const double max_time, const KDL::Twist& bounds, SolveType solve_type)
 {
   if (!initialized_)
   {
@@ -416,8 +410,8 @@ int TRAC_IK::CartToJnt(const KDL::JntArray &q_init, const KDL::Frame &p_in, KDL:
 
   bounds_ = bounds;
 
-  task1_ = std::thread(&TRAC_IK::runKDL, this, q_init, p_in, solve_type);
-  task2_ = std::thread(&TRAC_IK::runNLOPT, this, q_init, p_in, solve_type);
+  task1_ = std::thread(&TRAC_IK::runKDL, this, q_init, p_in, solve_type, max_time);
+  task2_ = std::thread(&TRAC_IK::runNLOPT, this, q_init, p_in, solve_type, max_time);
 
   if (task1_.joinable())
     task1_.join();

@@ -51,16 +51,11 @@ class ChainIkSolverPos_TL
   friend class TRAC_IK::TRAC_IK;
 
 public:
-  ChainIkSolverPos_TL(const Chain& chain, const JntArray& q_min, const JntArray& q_max, double max_time = 0.005, double eps = 1e-3, bool random_restart = false, bool try_jl_wrap = false);
+  ChainIkSolverPos_TL(const Chain& chain, const JntArray& q_min, const JntArray& q_max, double eps = 1e-3, bool random_restart = false, bool try_jl_wrap = false);
 
   ~ChainIkSolverPos_TL() = default;
 
-  int CartToJnt(const KDL::JntArray& q_init, const KDL::Frame& p_in, KDL::JntArray& q_out, const KDL::Twist bounds = KDL::Twist::Zero());
-
-  inline void setMaxtime(double t)
-  {
-    max_time_ = t;
-  }
+  int CartToJnt(const KDL::JntArray& q_init, const KDL::Frame& p_in, KDL::JntArray& q_out, const double max_time = 0.005, const KDL::Twist bounds = KDL::Twist::Zero());
 
 private:
   const Chain chain_;
@@ -72,7 +67,6 @@ private:
   KDL::ChainIkSolverVel_pinv vik_solver_;
   KDL::ChainFkSolverPos_recursive fk_solver_;
   JntArray delta_q_;
-  double max_time_;
 
   double eps_;
 
