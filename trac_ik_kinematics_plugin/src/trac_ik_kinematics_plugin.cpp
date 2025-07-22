@@ -376,7 +376,8 @@ bool TRAC_IKKinematicsPlugin::searchPositionIK(const geometry_msgs::msg::Pose& i
   auto end_time = std::chrono::system_clock::now() + std::chrono::duration<double>(timeout);
   while (std::chrono::system_clock::now() < end_time)
   {
-    int rc = ik_solver_->CartToJnt(in, frame, out, bounds, solve_type);
+    const double solver_timeout = std::chrono::duration<double>(end_time - std::chrono::system_clock::now()).count();
+    int rc = ik_solver_->CartToJnt(in, frame, out, solver_timeout, bounds, solve_type);
 
     // If you want to retrieve all the returned solutions, the (commented) code below does it
     // Note that you have to call getSolutions() AFTER a successful code to CartToJnt to get all the solutions generated

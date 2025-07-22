@@ -47,10 +47,10 @@ enum SolveType { Speed, Distance, Manip1, Manip2, Manip3 };
 class TRAC_IK
 {
 public:
-  TRAC_IK(rclcpp::Node::SharedPtr nh, const KDL::Chain& chain, const KDL::JntArray& q_min, const KDL::JntArray& q_max, double max_time = 0.005, double eps = 1e-5);
-  TRAC_IK(const KDL::Chain& chain, const KDL::JntArray& q_min, const KDL::JntArray& q_max, double max_time = 0.005, double eps = 1e-5, const rclcpp::Logger& logger = rclcpp::get_logger("trac_ik.trac_ik_lib"));
+  TRAC_IK(rclcpp::Node::SharedPtr nh, const KDL::Chain& chain, const KDL::JntArray& q_min, const KDL::JntArray& q_max, double eps = 1e-5);
+  TRAC_IK(const KDL::Chain& chain, const KDL::JntArray& q_min, const KDL::JntArray& q_max, double eps = 1e-5, const rclcpp::Logger& logger = rclcpp::get_logger("trac_ik.trac_ik_lib"));
 
-  TRAC_IK(rclcpp::Node::SharedPtr nh, const std::string& base_link, const std::string& tip_link, const std::string& URDF_param = "robot_description", double max_time = 0.005, double eps = 1e-5);
+  TRAC_IK(rclcpp::Node::SharedPtr nh, const std::string& base_link, const std::string& tip_link, const std::string& URDF_param = "robot_description", double eps = 1e-5);
 
   ~TRAC_IK();
 
@@ -99,7 +99,7 @@ public:
     return err;
   }
 
-  int CartToJnt(const KDL::JntArray &q_init, const KDL::Frame &p_in, KDL::JntArray &q_out, const KDL::Twist& bounds = KDL::Twist::Zero(), SolveType _type = Speed);
+  int CartToJnt(const KDL::JntArray &q_init, const KDL::Frame &p_in, KDL::JntArray &q_out, const double max_time = 0.005, const KDL::Twist& bounds = KDL::Twist::Zero(), SolveType _type = Speed);
 
 private:
   rclcpp::Logger logger_;
@@ -108,7 +108,6 @@ private:
   KDL::JntArray lb_, ub_;
   std::unique_ptr<KDL::ChainJntToJacSolver> jac_solver_;
   double eps_;
-  double max_time_;
 
   std::unique_ptr<NLOPT_IK::NLOPT_IK> nl_solver_;
   std::unique_ptr<KDL::ChainIkSolverPos_TL> ik_solver_;
@@ -120,16 +119,17 @@ private:
   bool runSolver(T1& solver, T2& other_solver,
                  const KDL::JntArray &q_init,
                  const KDL::Frame &p_in,
-                 const SolveType &solve_type);
+                 const SolveType &solve_type,
+                 const double max_time);
 
-  inline bool runKDL(const KDL::JntArray &q_init, const KDL::Frame &p_in, SolveType solve_type)
+  inline bool runKDL(const KDL::JntArray &q_init, const KDL::Frame &p_in, SolveType solve_type, const double max_time)
   {
-      return runSolver(*ik_solver_.get(), *nl_solver_.get(), q_init, p_in, solve_type);
+      return runSolver(*ik_solver_.get(), *nl_solver_.get(), q_init, p_in, solve_type, max_time);
   }
 
-  inline bool runNLOPT(const KDL::JntArray &q_init, const KDL::Frame &p_in, SolveType solve_type)
+  inline bool runNLOPT(const KDL::JntArray &q_init, const KDL::Frame &p_in, SolveType solve_type, const double max_time)
   {
-      return runSolver(*nl_solver_.get(), *ik_solver_.get(), q_init, p_in, solve_type);
+      return runSolver(*nl_solver_.get(), *ik_solver_.get(), q_init, p_in, solve_type, max_time);
   }
 
   void normalize_seed(const KDL::JntArray& seed, KDL::JntArray& solution);
@@ -173,8 +173,8 @@ private:
 
   void resetSolvers()
   {
-    nl_solver_.reset(new NLOPT_IK::NLOPT_IK(chain_, lb_, ub_, max_time_, eps_, NLOPT_IK::SumSq, logger_));
-    ik_solver_.reset(new KDL::ChainIkSolverPos_TL(chain_, lb_, ub_, max_time_, eps_, true, true));
+    nl_solver_.reset(new NLOPT_IK::NLOPT_IK(chain_, lb_, ub_, eps_, NLOPT_IK::SumSq, logger_));
+    ik_solver_.reset(new KDL::ChainIkSolverPos_TL(chain_, lb_, ub_, eps_, true, true));
   }
 
 };

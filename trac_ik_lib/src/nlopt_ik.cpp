@@ -191,11 +191,11 @@ void constrainfuncm(uint m, double* result, uint n, const double* x, double* gra
   }
 }
 
-NLOPT_IK::NLOPT_IK(rclcpp::Node::SharedPtr nh, const KDL::Chain& chain, const KDL::JntArray& q_min, const KDL::JntArray& q_max, double max_time, double eps, OptType type):
-  NLOPT_IK(chain, q_min, q_max, max_time, eps, type, nh->get_logger()){}
+NLOPT_IK::NLOPT_IK(rclcpp::Node::SharedPtr nh, const KDL::Chain& chain, const KDL::JntArray& q_min, const KDL::JntArray& q_max, double eps, OptType type):
+  NLOPT_IK(chain, q_min, q_max, eps, type, nh->get_logger()){}
 
-NLOPT_IK::NLOPT_IK(const KDL::Chain& chain, const KDL::JntArray& q_min, const KDL::JntArray& q_max, double max_time, double eps, OptType type, const rclcpp::Logger& logger):
-  logger_(logger), chain_(chain), fk_solver_(chain_), max_time_(max_time), eps_(std::abs(eps)), type_(type)
+NLOPT_IK::NLOPT_IK(const KDL::Chain& chain, const KDL::JntArray& q_min, const KDL::JntArray& q_max, double eps, OptType type, const rclcpp::Logger& logger):
+  logger_(logger), chain_(chain), fk_solver_(chain_), eps_(std::abs(eps)), type_(type)
 {
   assert(chain_.getNrOfJoints() == q_min.data.size());
   assert(chain_.getNrOfJoints() == q_max.data.size());
@@ -440,7 +440,7 @@ void NLOPT_IK::cartDQError(const std::vector<double>& x, double error[])
 }
 
 
-int NLOPT_IK::CartToJnt(const KDL::JntArray &q_init, const KDL::Frame &p_in, KDL::JntArray &q_out, const KDL::Twist bounds, const KDL::JntArray& q_desired)
+int NLOPT_IK::CartToJnt(const KDL::JntArray &q_init, const KDL::Frame &p_in, KDL::JntArray &q_out, const double max_time, const KDL::Twist bounds, const KDL::JntArray& q_desired)
 {
   // User command to start an IK solve.  Takes in a seed
   // configuration, a Cartesian pose, and (optional) a desired
@@ -468,7 +468,7 @@ int NLOPT_IK::CartToJnt(const KDL::JntArray &q_init, const KDL::Frame &p_in, KDL
     return -3;
   }
 
-  opt_.set_maxtime(max_time_);
+  opt_.set_maxtime(max_time);
 
 
   double minf; /* the minimum objective value, upon return */
@@ -585,7 +585,7 @@ int NLOPT_IK::CartToJnt(const KDL::JntArray &q_init, const KDL::Frame &p_in, KDL
   if (!aborted_ && progress_ < 0)
   {
     auto diff = system_clock_.now() - start_time;
-    auto time_left = max_time_ - diff.seconds();
+    auto time_left = max_time - diff.seconds();
 
     while (time_left > 0 && !aborted_ && progress_ < 0)
     {
@@ -605,7 +605,7 @@ int NLOPT_IK::CartToJnt(const KDL::JntArray &q_init, const KDL::Frame &p_in, KDL
         progress_ = -3;
 
       auto diff = system_clock_.now() - start_time;
-      time_left = max_time_ - diff.seconds();
+      time_left = max_time - diff.seconds();
     }
   }
 

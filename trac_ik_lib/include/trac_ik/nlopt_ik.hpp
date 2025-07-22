@@ -46,23 +46,18 @@ class NLOPT_IK
 {
   friend class TRAC_IK::TRAC_IK;
 public:
-  NLOPT_IK(rclcpp::Node::SharedPtr nh, const KDL::Chain& chain, const KDL::JntArray& q_min, const KDL::JntArray& q_max, double max_time = 0.005, double eps = 1e-3, OptType type = SumSq);
-  NLOPT_IK(const KDL::Chain& chain, const KDL::JntArray& q_min, const KDL::JntArray& q_max, double max_time = 0.005, double eps = 1e-3, OptType type = SumSq, const rclcpp::Logger& logger = rclcpp::get_logger("trac_ik.trac_ik_lib"));
+  NLOPT_IK(rclcpp::Node::SharedPtr nh, const KDL::Chain& chain, const KDL::JntArray& q_min, const KDL::JntArray& q_max, double eps = 1e-3, OptType type = SumSq);
+  NLOPT_IK(const KDL::Chain& chain, const KDL::JntArray& q_min, const KDL::JntArray& q_max, double eps = 1e-3, OptType type = SumSq, const rclcpp::Logger& logger = rclcpp::get_logger("trac_ik.trac_ik_lib"));
 
   ~NLOPT_IK() = default;
 
-  int CartToJnt(const KDL::JntArray& q_init, const KDL::Frame& p_in, KDL::JntArray& q_out, const KDL::Twist bounds = KDL::Twist::Zero(), const KDL::JntArray& q_desired = KDL::JntArray());
+  int CartToJnt(const KDL::JntArray& q_init, const KDL::Frame& p_in, KDL::JntArray& q_out, const double max_time = 0.005, const KDL::Twist bounds = KDL::Twist::Zero(), const KDL::JntArray& q_desired = KDL::JntArray());
 
   double minJoints(const std::vector<double>& x, std::vector<double>& grad);
   //  void cartFourPointError(const std::vector<double>& x, double error[]);
   void cartSumSquaredError(const std::vector<double>& x, double error[]);
   void cartDQError(const std::vector<double>& x, double error[]);
   void cartL2NormError(const std::vector<double>& x, double error[]);
-
-  inline void setMaxtime(double t)
-  {
-    max_time_ = t;
-  }
 
 private:
 
@@ -88,7 +83,6 @@ private:
 
   KDL::ChainFkSolverPos_recursive fk_solver_;
 
-  double max_time_;
   double eps_;
   int iter_counter_;
   OptType type_;
