@@ -573,8 +573,13 @@ int NLOPT_IK::CartToJnt(const KDL::JntArray &q_init, const KDL::Frame &p_in, KDL
   {
     opt_.optimize(x, minf);
   }
+  catch (nlopt::forced_stop)
+  {
+  }
   catch (...)
   {
+    std::exception_ptr p = std::current_exception();
+    RCLCPP_DEBUG_STREAM(nh_->get_logger(), "NLOpt IK optimization failed: " << (p ? p.__cxa_exception_type()->name() : "null"));
   }
 
   if (progress_ == -1) // Got NaNs
@@ -598,7 +603,14 @@ int NLOPT_IK::CartToJnt(const KDL::JntArray &q_init, const KDL::Frame &p_in, KDL
       {
         opt_.optimize(x, minf);
       }
-      catch (...) {}
+      catch (nlopt::forced_stop)
+      {
+      }
+      catch (...)
+      {
+        std::exception_ptr p = std::current_exception();
+        RCLCPP_DEBUG_STREAM_THROTTLE(nh_->get_logger(), system_clock_, 1000.0, "NLOpt IK optimization failed: " << (p ? p.__cxa_exception_type()->name() : "null"));
+      }
 
       if (progress_ == -1) // Got NaNs
         progress_ = -3;
