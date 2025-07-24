@@ -404,7 +404,7 @@ int TRAC_IK::CartToJnt(const KDL::JntArray &q_init, const KDL::Frame &p_in, KDL:
 {
   if (!initialized)
   {
-    RCLCPP_ERROR(nh_->get_logger(), "TRAC-IK was not properly initialized with a valid chain or limits.  IK cannot proceed");
+    RCLCPP_ERROR(nh_->get_logger(), "TRAC-IK was not properly initialized with a valid chain or limits. IK cannot proceed");
     return -1;
   }
 
