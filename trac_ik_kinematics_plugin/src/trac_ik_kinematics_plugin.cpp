@@ -348,10 +348,9 @@ bool TRAC_IKKinematicsPlugin::searchPositionIK(const geometry_msgs::msg::Pose& i
   std::string temp = solve_type_;
   if (solve_type_override)
   {
-    temp = *solve_type_override;;
+    temp = *solve_type_override;
+    RCLCPP_INFO_STREAM(LOGGER, "Overriding solve type with: " << temp);
   }
-
-  RCLCPP_WARN_STREAM(LOGGER, "Using solve type: " << temp);
 
   if (temp == "Manipulation1")
     solve_type = TRAC_IK::Manip1;
