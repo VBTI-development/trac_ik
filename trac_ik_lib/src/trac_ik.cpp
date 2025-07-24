@@ -170,11 +170,11 @@ void TRAC_IK::initialize()
   initialized_ = true;
 }
 
-bool TRAC_IK::unique_solution(const KDL::JntArray& sol)
+bool TRAC_IK::unique_solution(const KDL::JntArray& sol, const double eps)
 {
 
   for (uint i = 0; i < solutions_.size(); i++)
-    if (myEqual(sol, solutions_[i]))
+    if (KDL::Equal(sol, solutions_[i], eps))
       return false;
   return true;
 
