@@ -46,7 +46,6 @@ namespace TRAC_IK
   maxtime(_maxtime),
   solvetype(_type)
 {
-
   urdf::Model robot_model;
   std::string xml_string;
 
@@ -54,7 +53,7 @@ namespace TRAC_IK
     xml_string = nh_->declare_parameter(URDF_param, std::string(""));
   else
     nh_->get_parameter(URDF_param, xml_string);
-  
+
   if(xml_string.empty())
   {
     RCLCPP_FATAL(nh_->get_logger(), "Could not load the xml from parameter: %s", URDF_param.c_str());
@@ -169,11 +168,11 @@ void TRAC_IK::initialize()
   initialized = true;
 }
 
-bool TRAC_IK::unique_solution(const KDL::JntArray& sol)
+bool TRAC_IK::unique_solution(const KDL::JntArray& sol, const double eps)
 {
 
   for (uint i = 0; i < solutions.size(); i++)
-    if (myEqual(sol, solutions[i]))
+    if (KDL::Equal(sol, solutions[i], eps))
       return false;
   return true;
 
@@ -210,9 +209,8 @@ bool TRAC_IK::runSolver(T1& solver, T2& other_solver,
                         const KDL::Frame &p_in)
 {
   KDL::JntArray q_out;
-
-  double fulltime = maxtime;
   KDL::JntArray seed = q_init;
+  double fulltime = maxtime;
 
   while (true)
   {
@@ -282,6 +280,7 @@ bool TRAC_IK::runSolver(T1& solver, T2& other_solver,
       else
         seed(j) = fRand(lb(j), ub(j));
   }
+
   other_solver.abort();
 
   solver.setMaxtime(fulltime);
@@ -403,13 +402,11 @@ Eigen::MatrixXd TRAC_IK::computeSingularValues(const KDL::JntArray& arr)
 
 int TRAC_IK::CartToJnt(const KDL::JntArray &q_init, const KDL::Frame &p_in, KDL::JntArray &q_out, const KDL::Twist& _bounds)
 {
-
   if (!initialized)
   {
     RCLCPP_ERROR(nh_->get_logger(), "TRAC-IK was not properly initialized with a valid chain or limits.  IK cannot proceed");
     return -1;
   }
-
 
   start_time = system_clock.now();
 
@@ -458,4 +455,5 @@ TRAC_IK::~TRAC_IK()
   if (task2.joinable())
     task2.join();
 }
-}
+
+} // end of namespace TRAC_IK
