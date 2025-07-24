@@ -142,7 +142,7 @@ private:
   std::thread task1_, task2_;
   KDL::Twist bounds_;
 
-  bool unique_solution(const KDL::JntArray& sol);
+  bool unique_solution(const KDL::JntArray& sol, const double eps = 1e-4);
 
   inline static double fRand(double min, double max)
   {
@@ -161,11 +161,6 @@ private:
   double manipValue3(const KDL::JntArray& arr);
 
   Eigen::MatrixXd computeSingularValues(const KDL::JntArray& arr);
-
-  inline bool myEqual(const KDL::JntArray& a, const KDL::JntArray& b, const double eps=1e-4)
-  {
-    return (a.data - b.data).isZero(eps);
-  }
 
   void initialize();
 
