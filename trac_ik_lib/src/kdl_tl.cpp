@@ -59,7 +59,7 @@ ChainIkSolverPos_TL::ChainIkSolverPos_TL(const Chain& chain, const JntArray& q_m
 
   }
 
-  assert(types_.size() == _q_max.data.size());
+  assert(types_.size() == q_max.data.size());
 }
 
 
