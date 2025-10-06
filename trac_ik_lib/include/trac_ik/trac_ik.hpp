@@ -140,7 +140,7 @@ private:
   std::thread task1, task2;
   KDL::Twist bounds;
 
-  bool unique_solution(const KDL::JntArray& sol, const double eps = 1e-4);
+  bool unique_solution(const KDL::JntArray& sol, const double _eps = 1e-4);
 
   inline static double fRand(double min, double max)
   {
