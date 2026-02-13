@@ -457,7 +457,7 @@ int NLOPT_IK::CartToJnt(const KDL::JntArray &q_init, const KDL::Frame &p_in, KDL
 
   bounds = _bounds;
   q_out = q_init;
-  
+
   if (chain.getNrOfJoints() < 2)
   {
     RCLCPP_ERROR_THROTTLE(nh_->get_logger(), system_clock, 1000.0, "NLOpt_IK can only be run for chains of length 2 or more");

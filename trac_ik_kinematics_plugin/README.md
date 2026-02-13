@@ -1,5 +1,5 @@
 This package provides is a MoveIt! kinematics plugin that replaces the KDL IK
-solver with the TRAC-IK solver.  Currently mimic joints are *not* supported.  
+solver with the TRAC-IK solver.  Currently mimic joints are *not* supported.
 
 ###As of v1.4.3, this package is part of the ROS Indigo/Jade binaries: `sudo apt-get install ros-jade-trac-ik-kinematics-plugin`
 
@@ -30,7 +30,7 @@ detection and constraint checking may use Forward Kinematics to determine the
 pose of any subgoal joint configuration, but the planning _IS NOT_ being done
 in Cartesian space. After a joint trajectory is found, MoveIt! tries to smooth
 the trajectory to make it less "crazy looking", but this does not always
-result in a path that is pleasing to human users.  
+result in a path that is pleasing to human users.
 
 If you don't have obstacles in your space, you may want to try the Cartesian
 planning API in MoveIt! to get "straight-line" motion.  MoveIt's Cartesian

@@ -101,7 +101,7 @@ private:
     double f = (double)rand() / RAND_MAX;
     return min + f * (max - min);
   }
-  
+
   rclcpp::Clock system_clock;
 
 };
