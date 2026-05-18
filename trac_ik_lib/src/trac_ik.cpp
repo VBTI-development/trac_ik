@@ -39,10 +39,11 @@ OF THE POSSIBILITY OF SUCH DAMAGE.
 namespace TRAC_IK
 {
 
-  TRAC_IK::TRAC_IK(rclcpp::Node::SharedPtr nh, const std::string& base_link, const std::string& tip_link, const std::string& URDF_param, double _maxtime, double _eps, SolveType _type) :
+  TRAC_IK::TRAC_IK(rclcpp::Node::SharedPtr nh, const std::string& base_link, const std::string& tip_link, const std::string& URDF_param, double _maxtime, double _eps, double _solution_eps, SolveType _type) :
   nh_(nh),
   initialized(false),
   eps(_eps),
+  solution_eps(_solution_eps),
   maxtime(_maxtime),
   solvetype(_type)
 {
@@ -126,13 +127,14 @@ namespace TRAC_IK
 }
 
 
-  TRAC_IK::TRAC_IK(rclcpp::Node::SharedPtr nh, const KDL::Chain& _chain, const KDL::JntArray& _q_min, const KDL::JntArray& _q_max, double _maxtime, double _eps, SolveType _type):
+  TRAC_IK::TRAC_IK(rclcpp::Node::SharedPtr nh, const KDL::Chain& _chain, const KDL::JntArray& _q_min, const KDL::JntArray& _q_max, double _maxtime, double _eps, double _solution_eps, SolveType _type):
   nh_(nh),
   initialized(false),
   chain(_chain),
   lb(_q_min),
   ub(_q_max),
   eps(_eps),
+  solution_eps(_solution_eps),
   maxtime(_maxtime),
   solvetype(_type)
 {
@@ -235,7 +237,7 @@ bool TRAC_IK::runSolver(T1& solver, T2& other_solver,
         break;
       }
       mtx_.lock();
-      if (unique_solution(q_out))
+      if (unique_solution(q_out, solution_eps))
       {
         solutions.push_back(q_out);
         uint curr_size = solutions.size();

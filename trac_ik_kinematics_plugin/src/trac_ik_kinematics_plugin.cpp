@@ -360,7 +360,7 @@ bool TRAC_IKKinematicsPlugin::searchPositionIK(const geometry_msgs::msg::Pose &i
     solvetype = TRAC_IK::Speed;
   }
 
-  TRAC_IK::TRAC_IK ik_solver(node_, chain, joint_min, joint_max, timeout, params_->epsilon, solvetype);
+  TRAC_IK::TRAC_IK ik_solver(node_, chain, joint_min, joint_max, timeout, params_->epsilon, params_->solution_epsilon, solvetype);
 
   int rc = ik_solver.CartToJnt(in, frame, out, bounds);
 

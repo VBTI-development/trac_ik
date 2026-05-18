@@ -7,6 +7,14 @@ trac_ik_kinematics:
       gt<>: [ 0.0 ]
     }
   }
+  solution_epsilon: {
+    type: double,
+    default_value: 0.0001,
+    description: "Solution Epsilon. Default is 1e-4",
+    validation: {
+      gt<>: [ 0.0 ]
+    }
+  }
 
   position_only_ik: {
     type: bool,

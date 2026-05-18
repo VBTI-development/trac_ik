@@ -46,9 +46,9 @@ enum SolveType { Speed, Distance, Manip1, Manip2, Manip3 };
 class TRAC_IK
 {
 public:
-  TRAC_IK(rclcpp::Node::SharedPtr nh, const KDL::Chain& _chain, const KDL::JntArray& _q_min, const KDL::JntArray& _q_max, double _maxtime = 0.005, double _eps = 1e-5, SolveType _type = Speed);
+  TRAC_IK(rclcpp::Node::SharedPtr nh, const KDL::Chain& _chain, const KDL::JntArray& _q_min, const KDL::JntArray& _q_max, double _maxtime = 0.005, double _eps = 1e-5, double _solution_eps = 1e-4, SolveType _type = Speed);
 
-  TRAC_IK(rclcpp::Node::SharedPtr nh, const std::string& base_link, const std::string& tip_link, const std::string& URDF_param = "robot_description", double _maxtime = 0.005, double _eps = 1e-5, SolveType _type = Speed);
+  TRAC_IK(rclcpp::Node::SharedPtr nh, const std::string& base_link, const std::string& tip_link, const std::string& URDF_param = "robot_description", double _maxtime = 0.005, double _eps = 1e-5, double _solution_eps = 1e-4, SolveType _type = Speed);
 
   ~TRAC_IK();
 
@@ -111,6 +111,7 @@ private:
   KDL::JntArray lb, ub;
   std::unique_ptr<KDL::ChainJntToJacSolver> jacsolver;
   double eps;
+  double solution_eps;
   double maxtime;
   SolveType solvetype;
 
